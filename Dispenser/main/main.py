@@ -1,10 +1,13 @@
 #!/usr/bin/python35
+import sys
+import os
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")  # hack to allow sibling dir imports
 import RPi.GPIO as GPIO
 import picamera
 import logging
 # import schedule  # scheduling module, considering using
-from ..pill_recog import pill_recog  # import the pill recognition module
+import pill_recog.pill_recog
 
 
 class Medication:
@@ -12,6 +15,7 @@ class Medication:
         self.name = i_name  # name of medication
         self.dose = i_dose  # dosage of medication
         self.img_filename = i_img_filename  # link to ref image of pill
+
 
 class PatientData:
     def __init__(self, i_name: str, i_room_number: int, i_medication_list: list):
@@ -24,5 +28,7 @@ class PillDispenser:
     def __init__(self, patient_data: dict):
         self.patient_data = patient_data
 
-# GPIO.setmode(GPIO.BOARD)
-print("test")
+
+if __name__ == "__main__":
+    # GPIO.setmode(GPIO.BOARD)
+    print("Completed Successfully")

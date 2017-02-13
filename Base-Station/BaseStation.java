@@ -8,11 +8,14 @@ import java.awt.event.ActionListener;
 
 public class BaseStation extends JFrame implements ActionListener {
 
-
-    private JButton viewPatientData;
-    private JButton viewUnitData;
-    private JButton remoteControl;
-
+    private JMenuBar menuBar;
+    private JMenu file;
+    private JMenuItem viewPatientData;
+    private JMenuItem viewUnitData;
+    private JMenuItem remoteControl;
+    private JMenu options;
+    private JMenuItem resetPassword;
+    private JMenuItem addNewUser;
 
     public BaseStation() {
 
@@ -23,22 +26,46 @@ public class BaseStation extends JFrame implements ActionListener {
         setLayout(new FlowLayout());
 
         //buttons
-        viewPatientData = new JButton("View Patient Data");
+        menuBar= new JMenuBar();
+
+        file = new JMenu("File");
+        file.setActionCommand("File");
+        file.addActionListener(this);
+
+        viewPatientData = new JMenuItem("View Patient Data");
         viewPatientData.setActionCommand("View Patient Data");
         viewPatientData.addActionListener(this);
 
-        viewUnitData = new JButton("View Unit Data");
+        viewUnitData = new JMenuItem("View Unit Data");
         viewUnitData.setActionCommand("View Unit Data");
         viewUnitData.addActionListener(this);
 
-        remoteControl = new JButton("Remote Control");
+        remoteControl = new JMenuItem("Remote Control");
         remoteControl.setActionCommand("Remote Control");
         remoteControl.addActionListener(this);
 
-        add(viewPatientData);
-        add(viewUnitData);
-        add(remoteControl);
+        options = new JMenu("Options");
+        options.setActionCommand("Options");
+        options.addActionListener(this);
 
+        resetPassword = new JMenuItem("Reset Password");
+        resetPassword.setActionCommand("Reset Password");
+        resetPassword.addActionListener(this);
+
+        addNewUser = new JMenuItem("Add New User");
+        addNewUser.setActionCommand("Add New User");
+        addNewUser.addActionListener(this);
+
+        menuBar.add(file);
+        menuBar.add(options);
+        file.add(viewPatientData);
+        file.add(viewUnitData);
+        file.add(remoteControl);
+        options.add(addNewUser);
+        options.add(resetPassword);
+
+
+        setJMenuBar(menuBar);
         pack();
         setVisible(true);
         setResizable(false);

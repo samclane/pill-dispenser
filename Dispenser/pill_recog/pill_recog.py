@@ -1,5 +1,6 @@
 import cv2, sqlite3, time, os.path, pandas, math, sys
 import numpy as np
+import pickle
 # from matplotlib import pyplot as plt
 
 TARGET_PIXEL_AREA = 1000000.0
@@ -11,15 +12,15 @@ TARGET_PIXEL_AREA = 1000000.0
 def init_db():
     # Create database
     db = sqlite3.connect('example.db')
-    db.text_factory = str
-    c = db.cursor()
+    db.text_factory = str  # no clue what this does
+    c = db.cursor()  # add a new cursor object pointing to the db
     # Read schema from file
     with open('mysql_create_engine_data_20150511.txt', 'r') as schema:
-        command = schema.read()
-    time.sleep(1)
+        command = schema.read()  # read the one long input statement
+    time.sleep(1)  # wait to allow the read to finish
     # If database hasn't been created, create it
     if not os.path.isfile('example.db'):
-        c.execute(command)
+        c.execute(command)  # if the database hasn't been created, create it
     # read into datbase from tab file
     with open('pillbox_engine_20150511.tab', 'r') as pill_data:
         df = pandas.read_csv(pill_data, delimiter='\t', low_memory=False)
@@ -112,7 +113,7 @@ def process_img_db(db_dataframe):
     # for all pills that have files
     for index, row in db_dataframe.iterrows():
         # read in image
-        filename = 'images_full/' + str(row['splimage']) + '.jpg'
+        filename = 'images_test/' + str(row['splimage']) + '.jpg'
         img = cv2.imread(filename)
         if img is None:
             continue
@@ -168,8 +169,12 @@ def compare_img(compare_df, database_df):
 # main function
 if __name__ == "__main__":
     df = init_db()
-    # get dataframe of all pills with image
-    pill_df_dict = process_img_db(df)
+    if not os.path.isfile("pill_df_dict.p"):
+        # get dataframe of all pills with image
+        pill_df_dict = process_img_db(df)
+        pickle.dump(pill_df_dict, open("pill_df_dict.p", "wb"))
+    else:
+        pill_df_dict = pickle.load(open("pill_df_dict.p", "rb"))
     # for all pills that have files
     # iterate through consumer images
     for filename in os.listdir("consumer"):
@@ -188,4 +193,4 @@ if __name__ == "__main__":
         # if no features were found, skip pill
         if compare_df.empty:
             continue
-        compare_img(compareImage, pill_df_dict)
+        compare_img(compare_df, pill_df_dict)

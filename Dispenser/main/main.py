@@ -30,5 +30,5 @@ class PillDispenser:
 
 
 if __name__ == "__main__":
-    # GPIO.setmode(GPIO.BOARD)
+    GPIO.setmode(GPIO.BOARD)
     print("Completed Successfully")

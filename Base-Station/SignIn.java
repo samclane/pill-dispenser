@@ -2,7 +2,6 @@ package com.baseStationPackage;
 
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,7 +9,7 @@ import java.sql.SQLException;
 
 import static com.baseStationPackage.SignInBO.passwordCorrect;
 
-public class SignIn extends JFrame implements ActionListener {
+public class SignIn implements ActionListener {
 
 
     private JLabel userNameLabel;
@@ -18,32 +17,33 @@ public class SignIn extends JFrame implements ActionListener {
     private JTextField userNameField;
     private JTextField passwordField;
     private JButton signInButton;
+    private JFrame frame;
     private boolean access = false;
 
     public SignIn() {
 
-    super("Sign In");
-    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    setPreferredSize(new Dimension(500, 250));
-    ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20) );
-    setLayout(new FlowLayout());
-    signInButton = new JButton("Sign In");
-    signInButton.setActionCommand("Sign In");
-    signInButton.addActionListener(this);
+        frame = new JFrame("Home");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(450, 250));
+        frame.setLayout(new FlowLayout());
+        frame.setResizable(false);
 
-    userNameLabel = new JLabel("User Name: ");
-    passwordLabel = new JLabel("Password: ");
-    userNameField = new JTextField(30);
-    passwordField = new JPasswordField(30);
+        signInButton = new JButton("Sign In");
+        signInButton.setActionCommand("Sign In");
+        signInButton.addActionListener(this);
 
-    add(userNameLabel);
-    add(userNameField);
-    add(passwordLabel);
-    add(passwordField);
-    add(signInButton);
-    pack();
-    setVisible(true);
-    setResizable(false);
+        userNameLabel = new JLabel("User Name: ");
+        passwordLabel = new JLabel("Password: ");
+        userNameField = new JTextField(30);
+        passwordField = new JPasswordField(30);
+
+        frame.getContentPane().add(userNameLabel);
+        frame.getContentPane().add(userNameField);
+        frame.getContentPane().add(passwordLabel);
+        frame.getContentPane().add(passwordField);
+        frame.getContentPane().add(signInButton);
+        frame.pack();
+        frame.setVisible(true);
 }
     public void actionPerformed(ActionEvent e)
     {
@@ -58,7 +58,7 @@ public class SignIn extends JFrame implements ActionListener {
 
             if(access) {
                 access = true;
-                dispose();
+                frame.dispose();
                 new BaseStation();
             }
             else  {

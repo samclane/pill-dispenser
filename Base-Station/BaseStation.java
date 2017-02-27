@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class BaseStation extends JFrame implements ActionListener {
+public class BaseStation implements ActionListener {
 
     private JMenuBar menuBar;
     private JMenu file;
@@ -16,14 +16,15 @@ public class BaseStation extends JFrame implements ActionListener {
     private JMenu options;
     private JMenuItem resetPassword;
     private JMenuItem addNewUser;
+    private JFrame frame;
 
     public BaseStation() {
 
-        super("Base Station");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(500, 250));
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 20, 20, 20) );
-        setLayout(new FlowLayout());
+        frame = new JFrame("Home");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(500, 250));
+        frame.setLayout(new FlowLayout());
+        frame.setResizable(false);
 
         //buttons
         menuBar= new JMenuBar();
@@ -65,10 +66,9 @@ public class BaseStation extends JFrame implements ActionListener {
         options.add(resetPassword);
 
 
-        setJMenuBar(menuBar);
-        pack();
-        setVisible(true);
-        setResizable(false);
+        frame.setJMenuBar(menuBar);
+        frame.pack();
+        frame.setVisible(true);
     }
 
     public static void main(String[] args)
@@ -78,6 +78,10 @@ public class BaseStation extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if(e.getActionCommand().equals("View Patient Data")) {
+            frame.dispose();
+            new ViewPatientData();
+        }
 
     }
 }

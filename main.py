@@ -2,12 +2,12 @@
 import sys
 import os
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")  # hack to allow sibling dir imports
+
 import RPi.GPIO as GPIO
 import picamera
 import logging
 # import schedule  # scheduling module, considering using
-import pill_recog.pill_recog
+import pill_recog
 
 
 class Medication:

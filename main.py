@@ -5,12 +5,14 @@ from time import localtime, strftime
 
 import mechanism
 import pill_recog
-from scheduler import Scheduler
+import scheduler
 
 pill_dispenser = mechanism.Mechanism()
 
-state_logger = logging.getLogger('state_logger')
-state_logger.setLevel(logging.DEBUG)
+logger = logging.getLogger('state_logger')
+logger.setLevel(logging.DEBUG)
+
+scld = scheduler.Scheduler()
 
 
 class StateMachine:
@@ -39,7 +41,7 @@ class StateMachine:
         while True:
             (new_state, cargo) = handler(cargo)
             if new_state.upper() in self.end_states:
-                state_logger.info("reached " + new_state)
+                logger.info("reached " + new_state)
                 break
             else:
                 handler = self.handlers[new_state.upper()]
@@ -47,9 +49,9 @@ class StateMachine:
 
 def state(state_transition):
     def wrapper():
-        state_logger.info(state_transition.__name__)
+        logger.info(state_transition.__name__)
         output = state_transition()
-        state_logger.info(output[0])
+        logger.info(output[0])
 
     return wrapper
 
@@ -59,10 +61,8 @@ def start_transitions():
     # check if the schedules are current
     # if it is, go to read_schedules
     # else, update schedules
-    is_db_current = Scheduler.check_schedule()
-    if not is_db_current:
-        Scheduler.update_schedules()
-    schedule = Scheduler.get_schedule()
+    scld.check_schedule()
+    schedule = scheduler.get_schedule()
     new_state = "read_schedule_state"
     return (new_state, schedule)
 
@@ -72,10 +72,11 @@ def read_schedule_transitions(schedule):
     # check if it is time to dispense
     # if it is time, align pill chamber
     # else, loop back
-    curr_time = strftime("%Y-%m-%d %H:%M:%S", localtime())  # will probably change format
+    lt = localtime()
+    curr_time = (lt.tm_wday, "{}:{}".format(lt.tm_hour, lt.tm_sec))  # will probably change format
     if curr_time in schedule:
         new_state = "align_pill_chamber_state"
-        cargo = Scheduler.get_pill(curr_time)
+        cargo = scld.get_pills(curr_time)
     else:
         new_state = "read_schedule_state"
         cargo = schedule
@@ -136,5 +137,6 @@ if __name__ == "__main__":
     m.add_state("align pill chamber", align_pill_chamber_transitions)
     m.add_state("picture", picture_transitions)
     m.add_state("evaluate pill", evaluate_pill_transitions)
+    m.set_start("start")
     m.run(None)
     print("Completed Successfully")

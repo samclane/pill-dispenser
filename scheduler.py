@@ -24,7 +24,7 @@ class Scheduler:
         self.last_time_updated = None
         self.pilldb = {}
         # sql info
-        self.sql_host = 'localhost'
+        self.sql_host = '192.168.0.2'
         self.sql_port = 3306
         self.sql_user = 'root'
         self.sql_password = 'password'  # should probably store this differently but whatever
@@ -32,7 +32,7 @@ class Scheduler:
 
     def check_schedule(self):
         current_time = localtime()
-        if current_time.tm_yday > self.last_time_updated.tm_yday or self.last_time_updated is None:
+        if self.last_time_updated is None or current_time.tm_yday > self.last_time_updated.tm_yday :
             self.update_schedules()
 
     def update_schedules(self):
@@ -56,7 +56,7 @@ class Scheduler:
         self.last_time_updated = localtime()
 
     def get_schedule(self):
-        pass
+        return self.pilldb.values()
 
     def get_pills(self, curr_time: tuple) -> list:
         '''

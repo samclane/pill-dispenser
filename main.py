@@ -7,10 +7,12 @@ import mechanism
 import pill_recog
 import scheduler
 
+from functools import wraps
+
 pill_dispenser = mechanism.Mechanism()
 
-logger = logging.getLogger('state_logger')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger("state_logger")
+logger.setLevel(logging.INFO)
 
 scld = scheduler.Scheduler()
 
@@ -48,79 +50,80 @@ class StateMachine:
 
 
 def state(state_transition):
-    def wrapper():
-        logger.info(state_transition.__name__)
-        output = state_transition()
-        logger.info(output[0])
+    @wraps(state_transition)
+    def wrapper(*args, **kwargs):
+        logger.warning("Running: " + state_transition.__name__)
+        output = state_transition(*args, **kwargs)
+        logger.warning("    MoveTo: " + output[0])
+        return output
 
     return wrapper
 
 
 @state
-def start_transitions():
+def start_transitions(cargo):
     # check if the schedules are current
     # if it is, go to read_schedules
     # else, update schedules
     scld.check_schedule()
-    schedule = scheduler.get_schedule()
+    schedule = scld.get_schedule()
     new_state = "read_schedule_state"
     return (new_state, schedule)
 
 
 @state
-def read_schedule_transitions(schedule):
+def read_schedule_transitions(cargo):
     # check if it is time to dispense
     # if it is time, align pill chamber
     # else, loop back
     lt = localtime()
     curr_time = (lt.tm_wday, "{}:{}".format(lt.tm_hour, lt.tm_sec))  # will probably change format
-    if curr_time in schedule:
+    if curr_time in cargo:
         new_state = "align_pill_chamber_state"
         cargo = scld.get_pills(curr_time)
     else:
         new_state = "read_schedule_state"
-        cargo = schedule
+        cargo = cargo
     return (new_state, cargo)  # will probably not have to return scheude here
 
 
 @state
-def align_pill_chamber_transitions(pill_to_disp):
-    # if pill_curr == pill_to_disp move to pushkey forward
+def align_pill_chamber_transitions(cargo):
+    # if pill_curr == cargo move to pushkey forward
     # else, move chamber to next pill then loop back
     pill_curr = pill_dispenser.get_current_pill()
-    if pill_curr != pill_to_disp:
+    if pill_curr != cargo:
         next_state = "align_pill_chamber_state"
-        cargo = pill_to_disp
-    elif pill_curr == pill_to_disp:
+        cargo = cargo
+    elif pill_curr == cargo:
         pill_dispenser.dispense_pill()
         next_state = "picture_state"  # should probably refector name to be more accurate
-        cargo = None
+        cargo = "None"
     else:
         raise Exception("something has gone wrong in align_pill_chamber_transitions")
     return (next_state, cargo)
 
 
 @state
-def picture_transitions():
+def picture_transitions(cargo):
     # if pill is present, move to evaluate pill
     # if pill is not present, shake pill then loop back
-    picture = pill_recog.take_picture()
     if pill_recog.pill_present():
         next_state = "evaluate_pill_state"
-        cargo = picture
+        cargo = "None"
     else:
         pill_dispenser.shake_chamber()
         next_state = "picture_state"
-        cargo = None
+        cargo = "None"
     return (next_state, cargo)
     pass
 
 
 @state
-def evaluate_pill_transitions(picture):
+def evaluate_pill_transitions(cargo):
     # if confidence is >75%, open the hatch (success) then update DB
     # else, do a dispense error (failure)
-    confidence = pill_recog.evaluate_picture(picture)
+    confidence = pill_recog.evaluate_picture(cargo)
     if confidence >= .75:
         pill_dispenser.open_hatch()
         next_state = "start_transitions_state"
@@ -129,14 +132,20 @@ def evaluate_pill_transitions(picture):
     return (next_state, confidence)
     pass
 
+@state
+def dispense_error_transitions(cargo):
+    logger.error("Confidence too low ({})".format(cargo))
+    return ("None", "None")
+
 
 if __name__ == "__main__":
     m = StateMachine()
-    m.add_state("start", start_transitions)
-    m.add_state("read schedule", read_schedule_transitions)
-    m.add_state("align pill chamber", align_pill_chamber_transitions)
-    m.add_state("picture", picture_transitions)
-    m.add_state("evaluate pill", evaluate_pill_transitions)
-    m.set_start("start")
-    m.run(None)
+    m.add_state("start_transitions_state", start_transitions)
+    m.add_state("read_schedule_state", read_schedule_transitions)
+    m.add_state("align_pill_chamber_state", align_pill_chamber_transitions)
+    m.add_state("picture_state", picture_transitions)
+    m.add_state("evaluate_pill_state", evaluate_pill_transitions)
+    m.add_state("dispense_error_state", dispense_error_transitions, end_state=True)
+    m.set_start("start_transitions_state")
+    m.run("None")
     print("Completed Successfully")

@@ -15,13 +15,13 @@ FEED_ALIGN = STEPS_PER_CONTAINER / 2
 PillSlot = namedtuple('PillSlot', 'name step_location')
 
 
-class Mechanism(Adafruit_MotorHAT):
+class Mechanism:
     '''
     Control for the pill dispensing mechanism
     '''
     def __init__(self, *args, **kwargs):
         # Call base constructor
-        super(Adafruit_MotorHAT, self).__init__()
+        self.hat = Adafruit_MotorHAT()
         # Release motors on exit
         atexit.register(self.__turn_off_motors)
         # Assign motors
@@ -62,14 +62,14 @@ class Mechanism(Adafruit_MotorHAT):
 
     def __turn_off_motors(self):
         logging.info("Shutting down motors../")
-        self.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
-        self.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
-        self.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
-        self.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
+        self.hat.getMotor(1).run(Adafruit_MotorHAT.RELEASE)
+        self.hat.getMotor(2).run(Adafruit_MotorHAT.RELEASE)
+        self.hat.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
+        self.hat.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
         logging.info("All motors released")
 
     def __assign_motor(self, name: str, steps_per_rev: int, port: int, speed: int = 30):
-        self._motors[name] = self.getStepper(steps_per_rev, port)
+        self._motors[name] = self.hat.getStepper(steps_per_rev, port)
         self._motors[name].setSpeed(speed)
 
     def __execute_motor_action(self, port: int, stepper, numsteps, direction, style):

@@ -11,7 +11,7 @@ from functools import wraps
 
 pill_dispenser = mechanism.Mechanism()
 
-logger = logging.getLogger("state_logger")
+logger = logging.getLogger("dispenser")
 logger.setLevel(logging.INFO)
 
 scld = scheduler.Scheduler()
@@ -77,7 +77,7 @@ def read_schedule_transitions(cargo):
     # if it is time, align pill chamber
     # else, loop back
     lt = localtime()
-    curr_time = (lt.tm_wday, "{}:{}".format(lt.tm_hour, lt.tm_sec))  # will probably change format
+    curr_time = scheduler.datetime(lt.tm_wday, "{}:{}".format(lt.tm_hour, lt.tm_sec))
     if curr_time in cargo:
         new_state = "align_pill_chamber_state"
         cargo = scld.get_pills(curr_time)

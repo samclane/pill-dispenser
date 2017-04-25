@@ -5,20 +5,19 @@ import atexit
 import threading
 from collections import namedtuple
 
-NUM_CONTAINERS = 7
-DEG_PER_CONTAINER = 360 / NUM_CONTAINERS
-STEPS_PER_REV = 200
-STEPS_PER_DEG = STEPS_PER_REV / 360
-STEPS_PER_CONTAINER = STEPS_PER_DEG * DEG_PER_CONTAINER
-FEED_ALIGN = STEPS_PER_CONTAINER / 2
-
-PillSlot = namedtuple('PillSlot', 'name step_location')
+logger = logging.getLogger('dispenser.mechanism')
+logger.setLevel(logging.DEBUG)
 
 
 class Mechanism:
-    '''
-    Control for the pill dispensing mechanism
-    '''
+    """Control for the pill dispensing mechanism"""
+    NUM_CONTAINERS = 7
+    STEPS_PER_REV = 200
+    STEPS_PER_CONTAINER = STEPS_PER_REV / NUM_CONTAINERS
+    FEED_ALIGN = STEPS_PER_CONTAINER / 2
+
+    PillSlot = namedtuple('PillSlot', 'name step_location')
+
     def __init__(self, *args, **kwargs):
         # Call base constructor
         self.hat = Adafruit_MotorHAT()
@@ -29,7 +28,6 @@ class Mechanism:
         self.__assign_motor('shaft_motor', 200, 1, 30)
         # Create threads for each stepper port
         self.st1 = threading.Thread()
-        self.dc2 = threading.Thread()
         # dispenser data structures
         self.pill_dict = dict()
         self.current_step = 0
@@ -41,18 +39,18 @@ class Mechanism:
         100 steps - top feed slot
         :return: int
         """
-        return self.__current_step % STEPS_PER_REV
+        return self.__current_step % self.STEPS_PER_REV
 
     @current_step.setter
     def current_step(self, val):
-        if val > STEPS_PER_REV or val < 0:
-            self.__current_step = val % STEPS_PER_REV
+        if val > self.STEPS_PER_REV or val < 0:
+            self.__current_step = val % self.STEPS_PER_REV
         else:
             self.__current_step = val
 
     @property
     def top_slot(self):
-        return (self.current_step + 100) % STEPS_PER_REV
+        return (self.current_step + 100) % self.STEPS_PER_REV
 
     @staticmethod
     def __stepper_worker(stepper, numsteps, direction, style):
@@ -88,5 +86,4 @@ class Mechanism:
 
     def add_pill(self, pill_to_add):
         name = pill_to_add.name
-        self.pill_dict[self.top_slot] = PillSlot(name, self.top_slot)
-
+        self.pill_dict[self.top_slot] = self.PillSlot(name, self.top_slot)

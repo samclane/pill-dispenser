@@ -1,7 +1,7 @@
 import cv2, sqlite3, time, os.path, pandas, math, sys, pickle, logging, picamera
 import numpy as np
 
-logger = logging.getLogger('recognition_logger')
+logger = logging.getLogger('dispenser.recognizer')
 logger.setLevel(logging.DEBUG)
 
 # settings

@@ -4,7 +4,7 @@ import logging
 import re
 from collections import namedtuple
 
-logger = logging.getLogger('schedule_logging')
+logger = logging.getLogger('dispenser.scheduling')
 logger.setLevel(logging.DEBUG)
 
 # convert weekday letter to python datetime weekday code
@@ -18,8 +18,11 @@ WEEKDAY_CODES = {
     'S': 5
 }
 
+datetime = namedtuple('datetime', 'day hour')
+
 
 class Scheduler:
+
     def __init__(self):
         self.last_time_updated = None
         self.pilldb = {}
@@ -72,7 +75,6 @@ class Scheduler:
         '''
         schedule_regex = r"([UMTWRFS]+)([\d{2}:\d{2}]+)"
         time_regex = r"(\d{2}:\d{2})+"
-        datetime = namedtuple('datetime', 'day hour')
         datetime_schedule = []
         for dt in re.findall(schedule_regex, schedule):
             # for each match group

@@ -61,14 +61,14 @@ class Scheduler:
     def get_schedule(self):
         return self.pilldb.values()
 
-    def get_pills(self, curr_time: tuple) -> list:
+    def get_pills(self, curr_time):
         '''
         Returns all pills that are set to be dispensed at a certain time
         '''
         return [pill for pill in self.pilldb.keys() if curr_time in self.pilldb[pill]]
 
     @staticmethod
-    def _extract_datetime(schedule: str):
+    def _extract_datetime(schedule):
         '''
         :param schedule: str
         :return: list
